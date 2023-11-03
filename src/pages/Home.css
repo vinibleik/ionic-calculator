@@ -1,39 +1,42 @@
 ion-grid {
   --ion-grid-width: 100%;
-  /* --ion-grid-padding: 50px; */
+  --ion-grid-padding: 0px;
   /* --ion-grid-column-padding: 30px; */
 
-  border: 1px solid blue;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  overflow: hidden;
 }
 
 ion-row {
-  border: 1px solid red;
   height: calc(100% / 8);
 }
 
-.previous {
-  height: calc(100% / 8 * 1.5);
+.text-area {
+  text-align: right;
+  align-items: flex-end;
+  font-size: 1.5rem;
+  color: #fff;
 }
 
 .current {
+  border-top: solid 1px #fff;
   height: calc(100% / 8 * 2);
+  word-wrap: break-word;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
 }
 
 .button-col {
   background-color: #135d54;
   border: solid 1px #fff;
   color: #fff;
+  display: flex;
   text-align: center;
   justify-content: center;
   align-items: center;
-  display: flex;
   cursor: pointer;
   font-size: 2.5rem;
-  /* border-radius: 30%; */
-  /* padding: 20px; */
-  /* margin: 5px; */
 }

@@ -1,58 +1,114 @@
 import {
-  IonButton,
   IonCol,
   IonContent,
   IonGrid,
-  IonHeader,
   IonIcon,
   IonPage,
   IonRow,
-  IonTitle,
-  IonToolbar,
 } from "@ionic/react";
 import { backspaceOutline } from "ionicons/icons";
-import ExploreContainer from "../components/ExploreContainer";
+import { useReducer } from "react";
+import IonColButton from "../components/IonColButton";
 import "./Home.css";
+import { evaluate } from "mathjs";
+
+export type Action = {
+  type: string;
+  value: string;
+};
+
+type State = {
+  current: string;
+  previous: string;
+};
+
+export const ACTIONS = {
+  DELETE: "delete",
+  CLEAR: "clear",
+  DIGIT: "digit",
+  OPERATOR: "operator",
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case ACTIONS.DELETE:
+      return {
+        ...state,
+        current: state.current.slice(0, -1),
+      };
+    case ACTIONS.CLEAR:
+      return {
+        current: "",
+        previous: "",
+      };
+    case ACTIONS.DIGIT:
+      return {
+        ...state,
+        current: state.current + action.value,
+      };
+    case ACTIONS.OPERATOR:
+      break;
+  }
+
+  return {
+    ...state,
+  };
+}
 
 const Home: React.FC = () => {
+  const [state, dispatch] = useReducer(reducer, {
+    current: "",
+    previous: "",
+  });
+
+  function handleDelete() {
+    dispatch({ type: ACTIONS.DELETE, value: "" });
+  }
+
+  function handleClear() {
+    dispatch({ type: ACTIONS.CLEAR, value: "" });
+  }
+
   return (
     <IonPage>
-      <IonContent fullscreen>
+      <IonContent fullscreen scrollY={false}>
         <IonGrid>
-          <IonRow className="previous">
-            <IonCol>TEST</IonCol>
+          <IonRow className="previous text-area">
+            <IonCol>{state.previous}</IonCol>
           </IonRow>
-          <IonRow className="current">
-            <IonCol>TEST</IonCol>
+          <IonRow className="current text-area">
+            <IonCol>{state.current}</IonCol>
           </IonRow>
           <IonRow>
-            <IonCol className="button-col">AC</IonCol>
+            <IonCol className="button-col" onClick={(_) => handleClear()}>
+              AC
+            </IonCol>
             <IonCol className="button-col">(</IonCol>
             <IonCol className="button-col">)</IonCol>
             <IonCol className="button-col">÷</IonCol>
           </IonRow>
           <IonRow>
-            <IonCol className="button-col">7</IonCol>
-            <IonCol className="button-col">8</IonCol>
-            <IonCol className="button-col">9</IonCol>
+            <IonColButton text="7" dispatch={dispatch} />
+            <IonColButton text="8" dispatch={dispatch} />
+            <IonColButton text="9" dispatch={dispatch} />
             <IonCol className="button-col">✕</IonCol>
           </IonRow>
           <IonRow>
-            <IonCol className="button-col">4</IonCol>
-            <IonCol className="button-col">5</IonCol>
-            <IonCol className="button-col">6</IonCol>
+            <IonColButton text="4" dispatch={dispatch} />
+            <IonColButton text="5" dispatch={dispatch} />
+            <IonColButton text="6" dispatch={dispatch} />
             <IonCol className="button-col">-</IonCol>
           </IonRow>
           <IonRow>
-            <IonCol className="button-col">1</IonCol>
-            <IonCol className="button-col">2</IonCol>
-            <IonCol className="button-col">3</IonCol>
+            <IonColButton text="1" dispatch={dispatch} />
+            <IonColButton text="2" dispatch={dispatch} />
+            <IonColButton text="3" dispatch={dispatch} />
             <IonCol className="button-col">+</IonCol>
           </IonRow>
           <IonRow>
-            <IonCol className="button-col">0</IonCol>
+            <IonColButton text="0" dispatch={dispatch} />
             <IonCol className="button-col">.</IonCol>
-            <IonCol className="button-col">
+            <IonCol className="button-col" onClick={(_) => handleDelete()}>
               <IonIcon icon={backspaceOutline}></IonIcon>
             </IonCol>
             <IonCol className="button-col">=</IonCol>
