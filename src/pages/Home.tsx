@@ -10,7 +10,7 @@ import { atCircleOutline, backspaceOutline } from "ionicons/icons";
 import { useReducer } from "react";
 import IonColButton from "../components/IonColButton";
 import "./Home.css";
-import { evaluate } from "mathjs";
+import { evaluate, trueDependencies } from "mathjs";
 
 export type Action = {
   type: string;
@@ -21,6 +21,8 @@ type State = {
   current: string;
   previous: string;
   expression: string;
+  hasDot: boolean;
+  parenthesis: number;
 };
 
 const OPERATORS = { "+": "+", "-": "-", "÷": "/", "✕": "*" };
@@ -35,7 +37,24 @@ export const ACTIONS = {
   PARENTHESIS: "parenthesis",
 };
 
-function reducerEvaluate(state: State, action: Action): State {}
+function reducerEvaluate(state: State, action: Action): State {
+  try {
+    console.log(state.current);
+    console.log(state.expression);
+    const result = evaluate(state.expression);
+    return {
+      ...state,
+      current: result.toString(),
+      previous: state.expression,
+      expression: result.toString(),
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      ...state,
+    };
+  }
+}
 
 function reducerOperator(state: State, action: Action): State {
   const lastChar = state.current.at(-1);
@@ -46,6 +65,7 @@ function reducerOperator(state: State, action: Action): State {
         ...state,
         current: state.current + action.value,
         expression: state.expression + OPERATORS[action.value],
+        hasDot: false,
       };
     } else {
       return {
@@ -59,6 +79,7 @@ function reducerOperator(state: State, action: Action): State {
       ...state,
       current: state.current + action.value,
       expression: state.expression + OPERATORS[action.value],
+      hasDot: false,
     };
   }
 
@@ -68,18 +89,21 @@ function reducerOperator(state: State, action: Action): State {
         ...state,
         current: "",
         expression: "",
+        hasDot: false,
       };
     } else if (lastChar === "-" && state.current.at(-2) in OPERATORS) {
       return {
         ...state,
         current: state.current.slice(0, -1),
         expression: state.expression.slice(0, -1),
+        hasDot: false,
       };
     } else {
       return {
         ...state,
         current: state.current.slice(0, -1) + action.value,
         expression: state.expression.slice(0, -1) + OPERATORS[action.value],
+        hasDot: false,
       };
     }
   }
@@ -89,6 +113,7 @@ function reducerOperator(state: State, action: Action): State {
       ...state,
       current: state.current + action.value,
       expression: state.expression + OPERATORS[action.value],
+      hasDot: false,
     };
   }
 
@@ -97,8 +122,48 @@ function reducerOperator(state: State, action: Action): State {
   };
 }
 
+function reducerDelete(state: State, action: Action): State {
+  const lastChar = state.current.at(-1);
+  if (lastChar === ".") {
+    return {
+      ...state,
+      current: state.current.slice(0, -1),
+      expression: state.expression.slice(0, -1),
+      hasDot: false,
+    };
+  } else if (!(lastChar in OPERATORS)) {
+    return {
+      ...state,
+      current: state.current.slice(0, -1),
+      expression: state.expression.slice(0, -1),
+    };
+  }
+
+  for (
+    let i = state.current.length - 2;
+    i >= 0 || !(state.current[i] in OPERATORS);
+    i--
+  ) {
+    if (state.current[i] === ".") {
+      return {
+        ...state,
+        current: state.current.slice(0, -1),
+        expression: state.expression.slice(0, -1),
+        hasDot: true,
+      };
+    }
+  }
+
+  return {
+    ...state,
+    current: state.current.slice(0, -1),
+    expression: state.expression.slice(0, -1),
+    hasDot: false,
+  };
+}
+
 function reducerDot(state: State, action: Action): State {
-  if (state.current.includes(".")) {
+  if (state.hasDot) {
     return {
       ...state,
     };
@@ -107,6 +172,8 @@ function reducerDot(state: State, action: Action): State {
   return {
     ...state,
     current: state.current + action.value,
+    expression: state.expression + action.value,
+    hasDot: true,
   };
 }
 
@@ -117,16 +184,16 @@ function reducer(state: State, action: Action): State {
         current: "",
         previous: "",
         expression: "",
+        hasDot: false,
+        parenthesis: 0,
       };
     case ACTIONS.DELETE:
-      return {
-        ...state,
-        current: state.current.slice(0, -1),
-      };
+      return reducerDelete(state, action);
     case ACTIONS.DIGIT:
       return {
         ...state,
         current: state.current + action.value,
+        expression: state.expression + action.value,
       };
     case ACTIONS.DOT:
       return reducerDot(state, action);
@@ -135,7 +202,27 @@ function reducer(state: State, action: Action): State {
     case ACTIONS.EVALUATE:
       return reducerEvaluate(state, action);
     case ACTIONS.PARENTHESIS:
-      break;
+      if (action.value === "(") {
+        return {
+          ...state,
+          current: state.current + action.value,
+          expression: state.expression + action.value,
+          parenthesis: state.parenthesis + 1,
+        };
+      } else if (action.value === ")") {
+        if (state.parenthesis > 0) {
+          return {
+            ...state,
+            current: state.current + action.value,
+            expression: state.expression + action.value,
+            parenthesis: state.parenthesis - 1,
+          };
+        }
+      } else {
+        return {
+          ...state,
+        };
+      }
   }
 
   return {
@@ -148,6 +235,8 @@ const Home: React.FC = () => {
     current: "",
     previous: "",
     expression: "",
+    hasDot: false,
+    parenthesis: 0,
   });
 
   function handleDelete() {
@@ -160,6 +249,10 @@ const Home: React.FC = () => {
 
   function handleOperator(value: string) {
     dispatch({ type: ACTIONS.OPERATOR, value });
+  }
+
+  function handleParenthesis(value: string) {
+    dispatch({ type: ACTIONS.PARENTHESIS, value });
   }
 
   return (
@@ -176,10 +269,16 @@ const Home: React.FC = () => {
             <IonCol className="button-col" onClick={(_) => handleClear()}>
               AC
             </IonCol>
-            <IonCol className="button-col" onClick={(_) => handleOperator("(")}>
+            <IonCol
+              className="button-col"
+              onClick={(_) => handleParenthesis("(")}
+            >
               (
             </IonCol>
-            <IonCol className="button-col" onClick={(_) => handleOperator(")")}>
+            <IonCol
+              className="button-col"
+              onClick={(_) => handleParenthesis(")")}
+            >
               )
             </IonCol>
             <IonCol className="button-col" onClick={(_) => handleOperator("÷")}>

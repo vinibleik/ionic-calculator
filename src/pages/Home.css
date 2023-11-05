@@ -24,9 +24,10 @@ ion-row {
 .current {
   border-top: solid 1px #fff;
   height: calc(100% / 8 * 2);
-  word-wrap: break-word;
+  word-wrap: normal;
   font-size: 2.5rem;
   margin-bottom: 10px;
+  overflow-x: scroll;
 }
 
 .button-col {
