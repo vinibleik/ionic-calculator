@@ -11,14 +11,15 @@ ion-grid {
 }
 
 ion-row {
-  height: calc(100% / 8);
+  height: calc(100% / 10);
 }
 
 .text-area {
   text-align: right;
   align-items: flex-end;
   font-size: 1.5rem;
-  color: #fff;
+  background-color: var(--ion-color-medium);
+  color: var(--ion-color-light);
 }
 
 .current {
@@ -26,18 +27,41 @@ ion-row {
   height: calc(100% / 8 * 2);
   word-wrap: normal;
   font-size: 2.5rem;
-  margin-bottom: 10px;
+  padding-bottom: 10px;
   overflow-x: scroll;
+  scroll-behavior: smooth;
 }
 
 .button-col {
-  background-color: #135d54;
-  border: solid 1px #fff;
-  color: #fff;
+  background-color: var(--ion-color-primary);
+  border: solid 1px var(--ion-color-medium);
+  color: var(--ion-color-light);
   display: flex;
   text-align: center;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  font-size: 2.5rem;
+  font-size: 2rem;
+}
+
+#history-container {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+#history {
+  overflow-y: scroll;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
+  font-size: 1.7rem;
+  padding: 0;
+  padding-right: 20px;
+  margin: 0;
 }
